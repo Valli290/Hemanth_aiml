@@ -1,0 +1,41 @@
+
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_classification
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
+
+# Generate synthetic binary classification data
+X, y = make_classification(n_samples=1000, n_features=20, n_informative=5, random_state=42)
+
+# Train a logistic regression model
+model = LogisticRegression()
+model.fit(X, y)
+
+# Get prediction probabilities
+y_proba = model.predict_proba(X)[:, 1]  # Probability of positive class
+
+# Range of thresholds to test
+thresholds = np.linspace(0, 1, 101)
+precisions, recalls, f1s, accuracies = [], [], [], []
+
+for t in thresholds:
+    y_pred = (y_proba >= t).astype(int)
+    precisions.append(precision_score(y, y_pred, zero_division=0))
+    recalls.append(recall_score(y, y_pred))
+    f1s.append(f1_score(y, y_pred))
+    accuracies.append(accuracy_score(y, y_pred))
+
+# Plot the results
+plt.figure(figsize=(10, 6))
+plt.plot(thresholds, precisions, label='Precision', marker='.')
+plt.plot(thresholds, recalls, label='Recall', marker='.')
+plt.plot(thresholds, f1s, label='F1 Score', marker='.')
+plt.plot(thresholds, accuracies, label='Accuracy', marker='.')
+plt.xlabel('Decision Threshold')
+plt.ylabel('Metric Value')
+plt.title('Effect of Threshold on Classification Metrics')
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.show()
